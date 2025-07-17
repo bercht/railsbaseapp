@@ -14,8 +14,8 @@
     <div class="max-w-7xl mx-auto bg-gray-800 p-8">
       <div class="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-8">
         
-        <!-- Galeria de imagens -->
-        <div class="flex flex-col-reverse">
+        <!-- Galeria de imagens - ADICIONADO: data-controller="spotlight" -->
+        <div class="flex flex-col-reverse" data-controller="spotlight">
           <% if @property.images.attached? %>
             <!-- Hidden links for Spotlight.js gallery -->
             <% if @property.images.count > 4 %>
@@ -34,12 +34,14 @@
             <div class="mx-auto mt-6 hidden w-full max-w-2xl sm:block lg:max-w-none">
               <div class="grid grid-cols-4 gap-6" aria-orientation="horizontal" role="tablist">
                 <% @property.images.limit(4).each_with_index do |image, index| %>
+                  <!-- ADICIONADO: data-spotlight-thumbnail-target="thumbnail" -->
                   <a href="<%= url_for(image) %>" 
                      class="spotlight relative flex h-24 cursor-pointer items-center justify-center rounded-md bg-gray-800 text-sm font-medium text-gray-300 uppercase hover:bg-gray-700 focus:ring-3 focus:ring-indigo-500/50 focus:ring-offset-4 focus:outline-hidden image-thumb"
                      data-image-url="<%= url_for(image) %>"
                      data-group="property-gallery"
                      data-title="<%= @property.title %> - Imagem <%= index + 1 %>"
-                     aria-label="Ver imagem <%= index + 1 %>">
+                     aria-label="Ver imagem <%= index + 1 %>"
+                     data-spotlight-thumbnail-target="thumbnail">
                     <span class="absolute inset-0 overflow-hidden rounded-md">
                       <%= image_tag image, alt: @property.title, class: "size-full object-cover" %>
                     </span>
@@ -57,14 +59,18 @@
             <!-- Main image -->
             <div>
               <div class="main-image-container">
+                <!-- ADICIONADO: data-spotlight-main-image-link-target="mainImageLink" -->
                 <a href="<%= url_for(@property.images.first) %>" 
                    class="spotlight"
                    data-group="property-gallery"
-                   data-title="<%= @property.title %> - Imagem principal">
+                   data-title="<%= @property.title %> - Imagem principal"
+                   data-spotlight-main-image-link-target="mainImageLink">
+                  <!-- ADICIONADO: data-spotlight-main-image-target="mainImage" -->
                   <%= image_tag @property.images.first, 
                       alt: @property.title, 
                       class: "aspect-square w-full object-cover sm:rounded-lg cursor-pointer main-image",
-                      id: "mainImage" %>
+                      id: "mainImage",
+                      data: { spotlight_main_image_target: "mainImage" } %>
                 </a>
               </div>
             </div>
@@ -86,7 +92,7 @@
           <h1 class="text-3xl font-bold tracking-tight text-white"><%= @property.title %></h1>
           
           <% if @property.featured? %>
-            <span class="inline-flex items-center rounded-md bg-yellow-100 px-2 py-1 text-sm font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20 mt-2">
+            <span class="inline-flex items-center rounded-md bg-yellow-600 px-2 py-1 text-sm font-medium text-yellow-100 ring-1 ring-inset ring-yellow-500/20 mt-2">
               ⭐ DESTAQUE
             </span>
           <% end %>
@@ -98,14 +104,14 @@
             </p>
           </div>
 
-          <!-- Tipo e Bairro -->
+          <!-- Property Type and Neighborhood -->
           <div class="mt-3 space-y-2">
             <% if @property.property_type.present? %>
               <div class="flex items-center">
                 <svg class="h-5 w-5 text-gray-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H3m2 0h4m0 0V9a2 2 0 012-2h2a2 2 0 012 2v12" />
                 </svg>
-                <span class="text-sm font-medium text-white"><%= @property.property_type.humanize %></span>
+                <span class="text-sm font-medium text-gray-300"><%= @property.property_type.humanize %></span>
               </div>
             <% end %>
             
@@ -114,13 +120,11 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-              <%= link_to @property.neighborhood.name, 
-                  neighborhood_path(@property.neighborhood), 
-                  class: "text-indigo-400 hover:text-indigo-300 font-medium" %>
+              <span class="text-indigo-300 font-medium"><%= @property.neighborhood.name %></span>
             </div>
           </div>
 
-          <!-- Grid de características -->
+          <!-- Property Details Grid -->
           <div class="mt-6">
             <h3 class="text-sm font-medium text-white">Características</h3>
             <dl class="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -129,6 +133,7 @@
                   <dt class="font-medium text-white flex items-center">
                     <svg class="h-5 w-5 text-gray-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 21l0-12" />
                     </svg>
                     Quartos
                   </dt>
@@ -180,14 +185,11 @@
               <h3 class="text-sm font-medium text-white">Características Especiais</h3>
               <div class="mt-3">
                 <% if @property.furnished? %>
-                  <span class="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800 ring-1 ring-inset ring-green-600/20">
-                    <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                    Mobiliado
+                  <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
+                    ✓ Mobiliado
                   </span>
                 <% else %>
-                  <span class="inline-flex items-center rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-800 ring-1 ring-inset ring-gray-600/20">
+                  <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">
                     Não mobiliado
                   </span>
                 <% end %>
@@ -195,22 +197,106 @@
             </div>
           <% end %>
 
-          <!-- Descrição -->
-          <div class="mt-6">
-            <h3 class="text-sm font-medium text-white">Descrição</h3>
-            <div class="mt-3 space-y-6 text-base text-gray-300">
-              <p><%= simple_format(@property.description) %></p>
+          <!-- Property Description -->
+          <% if @property.description.present? %>
+            <div class="mt-6">
+              <h3 class="text-sm font-medium text-white">Descrição</h3>
+              <div class="mt-3 space-y-6">
+                <p class="text-base text-gray-300 whitespace-pre-line"><%= @property.description %></p>
+              </div>
+            </div>
+          <% end %>
+
+          <!-- Status e Ações -->
+          <div class="mt-8 space-y-4">
+            <div class="flex items-center">
+              <span class="text-gray-400 mr-2">Status:</span>
+              <% if @property.featured? %>
+                <span class="inline-flex items-center rounded-md bg-green-600 px-2 py-1 text-xs font-medium text-green-100">
+                  Destaque
+                </span>
+              <% else %>
+                <span class="inline-flex items-center rounded-md bg-red-600 px-2 py-1 text-xs font-medium text-red-100">
+                  Simples
+                </span>
+              <% end %>
+            </div>
+
+            <div class="flex space-x-3">
+              <%= link_to "Editar", edit_admin_property_path(@property), 
+                  class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+              
+              <%= link_to "Excluir", admin_property_path(@property), 
+                  method: :delete,
+                  data: { 
+                    controller: "confirm-delete",
+                    action: "click->confirm-delete#confirm",
+                    "confirm-delete-message-value": "Tem certeza que deseja excluir este imóvel? Esta ação não pode ser desfeita."
+                  },
+                  class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" %>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Seção do mapa -->
-      <section aria-labelledby="contact-heading" class="mt-16 border-t border-gray-700 pt-16">
-        <div class="grid grid-cols-1">
-          <div>
-            <h2 id="contact-heading" class="text-2xl font-bold text-white mb-6">Localização</h2>
-            <div class="bg-gray-700 h-96 rounded-lg flex items-center justify-center border border-gray-700">
+      <!-- Seção adicional com informações técnicas -->
+      <section class="mt-12 pt-12 border-t border-gray-700">
+        <h2 class="text-2xl font-bold text-white mb-8">Detalhes Técnicos</h2>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <!-- Informações gerais -->
+          <div class="bg-gray-700 rounded-lg p-6">
+            <h3 class="text-lg font-medium text-white mb-4">Informações Gerais</h3>
+            <dl class="space-y-3">
+              <div class="flex justify-between">
+                <dt class="text-gray-400">ID:</dt>
+                <dd class="text-white font-mono">#<%= @property.id %></dd>
+              </div>
+              <div class="flex justify-between">
+                <dt class="text-gray-400">Criado em:</dt>
+                <dd class="text-white"><%= @property.created_at.strftime("%d/%m/%Y") %></dd>
+              </div>
+              <div class="flex justify-between">
+                <dt class="text-gray-400">Atualizado em:</dt>
+                <dd class="text-white"><%= @property.updated_at.strftime("%d/%m/%Y") %></dd>
+              </div>
+              <% if @property.furnished.present? %>
+                <div class="flex justify-between">
+                  <dt class="text-gray-400">Mobiliado:</dt>
+                  <dd class="text-white"><%= @property.furnished? ? 'Sim' : 'Não' %></dd>
+                </div>
+              <% end %>
+            </dl>
+          </div>
+
+          <!-- Imagens -->
+          <div class="bg-gray-700 rounded-lg p-6">
+            <h3 class="text-lg font-medium text-white mb-4">Imagens</h3>
+            <dl class="space-y-3">
+              <div class="flex justify-between">
+                <dt class="text-gray-400">Total de imagens:</dt>
+                <dd class="text-white"><%= @property.images.count %></dd>
+              </div>
+              <% if @property.images.attached? %>
+                <div class="flex justify-between">
+                  <dt class="text-gray-400">Primeira imagem:</dt>
+                  <dd class="text-white text-sm">
+                    <%= @property.images.first&.blob&.filename&.to_s&.truncate(20) %>
+                  </dd>
+                </div>
+              <% end %>
+            </dl>
+          </div>
+
+          <!-- Localização -->
+          <div class="bg-gray-700 rounded-lg p-6">
+            <h3 class="text-lg font-medium text-white mb-4">Localização</h3>
+            <% if @property.neighborhood.present? %>
+              <p class="text-gray-300 mb-4"><%= @property.neighborhood.name %></p>
+            <% end %>
+            
+            <!-- Placeholder para mapa -->
+            <div class="aspect-video rounded-lg flex items-center justify-center border border-gray-700">
               <div class="text-center">
                 <svg class="mx-auto h-16 w-16 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -222,21 +308,51 @@
             </div>
           </div>
         </div>
-      </section>  
+      </section>
+
+      <!-- Imóveis relacionados - CORRIGIDO: @related_properties -->
+      <% if @related_properties.any? %>
+        <section class="mt-12 pt-12 border-t border-gray-700">
+          <h2 class="text-2xl font-bold text-white mb-8">Outros Imóveis no Bairro</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <% @related_properties.each do |property| %>
+              <div class="bg-gray-700 rounded-lg overflow-hidden">
+                <% if property.images.attached? %>
+                  <div class="aspect-video">
+                    <%= image_tag property.images.first, alt: property.title, class: "w-full h-full object-cover" %>
+                  </div>
+                <% else %>
+                  <div class="aspect-video bg-gray-600 flex items-center justify-center">
+                    <svg class="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                <% end %>
+                <div class="p-4">
+                  <h3 class="text-white font-medium truncate"><%= property.title %></h3>
+                  <p class="text-green-400 font-bold mt-1">
+                    <%= number_to_currency(property.price, unit: "R$ ", separator: ",", delimiter: ".") %>
+                  </p>
+                  <div class="mt-3">
+                    <%= link_to "Ver Detalhes", admin_property_path(property), 
+                        class: "inline-flex items-center px-3 py-1 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700" %>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </section>
+      <% end %>
     </div>
   </div>
 </div>
 
-<!-- Script para galeria -->
-<!-- No final do arquivo admin/properties/show.html.erb, substitua o script atual por: -->
-
-<!-- Script para galeria -->
+<!-- REMOVIDO: Todo o script inline que conflitava com Turbo -->
 <script>
-// Aguarda o evento turbo:load para compatibilidade com Turbo
-document.addEventListener('turbo:load', function() {
-  
-  function initSpotlight() {
-    if (typeof Spotlight !== 'undefined') {
+  if (typeof Spotlight === 'undefined') {
+    const script = document.createElement('script');
+    script.src = 'https://rawcdn.githack.com/nextapps-de/spotlight/0.7.8/dist/js/spotlight.min.js';
+    script.onload = function() {
       Spotlight.init({
         fit: 'contain',
         animation: 'slide',
@@ -251,64 +367,9 @@ document.addEventListener('turbo:load', function() {
         autohide: true,
         infinite: true
       });
-    } else {
-      // Tenta novamente após 100ms
-      setTimeout(initSpotlight, 100);
-    }
+    };
+    document.head.appendChild(script);
+  } else {
+    Spotlight.init({...}); // mesma config
   }
-
-  // Functionality for changing main image
-  const mainImage = document.getElementById('mainImage');
-  const mainImageLink = mainImage?.parentElement;
-  const thumbnails = document.querySelectorAll('.image-thumb');
-
-  // Switch main image when clicking thumbnails
-  thumbnails.forEach(thumb => {
-    thumb.addEventListener('click', function(e) {
-      e.preventDefault();
-      
-      const newImageUrl = this.dataset.imageUrl;
-      const newTitle = this.dataset.title;
-      
-      // Update main image
-      if (mainImage) {
-        mainImage.src = newImageUrl;
-      }
-      
-      // Update main image link for spotlight
-      if (mainImageLink) {
-        mainImageLink.href = newImageUrl;
-        mainImageLink.dataset.title = newTitle;
-      }
-      
-      // Update active thumbnail
-      thumbnails.forEach(t => {
-        const ring = t.querySelector('span:last-child');
-        if (ring) ring.classList.remove('ring-indigo-500');
-      });
-      const currentRing = this.querySelector('span:last-child');
-      if (currentRing) currentRing.classList.add('ring-indigo-500');
-    });
-  });
-
-  // Set first thumbnail as active by default
-  if (thumbnails.length > 0) {
-    const firstRing = thumbnails[0].querySelector('span:last-child');
-    if (firstRing) firstRing.classList.add('ring-indigo-500');
-  }
-
-  // Initialize Spotlight with delay
-  setTimeout(initSpotlight, 200);
-});
-
-// Limpar Spotlight ao sair da página
-document.addEventListener('turbo:before-cache', function() {
-  if (typeof Spotlight !== 'undefined') {
-    try {
-      Spotlight.destroy();
-    } catch (e) {
-      console.log("Spotlight já foi destruído");
-    }
-  }
-});
 </script>
